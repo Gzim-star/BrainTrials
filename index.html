@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Chromatic Trial</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<style>
+html, body {
+  height: 100%;
+  margin: 0;
+}
+body {
+  display: grid;
+  place-items: center;
+  background: #000;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+#gameContainer {
+  width: 90%;
+  max-width: 700px;
+  min-height: 500px;
+  padding: 20px;
+  background: #000;
+  border-radius: 15px;
+  box-shadow: 0 0 25px rgba(255,255,255,0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+h1 {
+  font-size: 1.6em;
+  margin-bottom: 20px;
+  color: #4dd0e1;
+}
+
+#grid {
+  display: grid;
+  grid-template-columns: repeat(3, 120px);
+  grid-template-rows: repeat(3, 120px);
+  gap: 12px;
+}
+
+.tile {
+  width: 120px;
+  height: 120px;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: transform 0.15s, filter 0.15s;
+}
+
+.tile:hover {
+  transform: scale(1.05);
+  filter: brightness(1.15);
+}
+
+@media (max-width: 600px) {
+  #grid {
+    grid-template-columns: repeat(3, 90px);
+    grid-template-rows: repeat(3, 90px);
+  }
+  .tile {
+    width: 90px;
+    height: 90px;
+  }
+}
+</style>
+</head>
+
+<body>
+<div id="gameContainer">
+  <h1>Chromatic Trial</h1>
+  <div id="grid"></div>
+</div>
+
+<script>
+const colors = [
+  "#e57373",
+  "#64b5f6",
+  "#81c784",
+  "#fff176",
+  "#ba68c8"
+];
+
+let tiles = [];
+
+function createGrid() {
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+  tiles = [];
+
+  for (let i = 0; i < 9; i++) {
+    const div = document.createElement("div");
+    div.className = "tile";
+    div.dataset.color = Math.floor(Math.random() * colors.length);
+    div.style.backgroundColor = colors[div.dataset.color];
+
+    div.onclick = () => cycleColor(div);
+
+    tiles.push(div);
+    grid.appendChild(div);
+  }
+}
+
+function cycleColor(tile) {
+  let index = Number(tile.dataset.color);
+  index = (index + 1) % colors.length;
+  tile.dataset.color = index;
+  tile.style.backgroundColor = colors[index];
+}
+
+createGrid();
+</script>
+</body>
+</html>
