@@ -89,7 +89,7 @@ h1 {
 </div>
 
 <script>
-// 🧠 Chromatic Trial mit Nachbar-Feldern
+// 🧠 Chromatic Trial
 // © 2025 Gëzim Hasani
 
 const colors = [
@@ -101,7 +101,8 @@ const colors = [
 ];
 
 const GOAL_COLOR = "#ba68c8";
-const TOTAL_TIME = 60;
+const SECRET_COLOR = "#fff176"; // Gelb als Geheimnis
+const TOTAL_TIME = 60; 
 
 let tiles = [];
 let timeLeft = TOTAL_TIME;
@@ -127,8 +128,7 @@ function createGrid() {
     tile.dataset.color = startIndex;
     tile.style.backgroundColor = colors[startIndex];
 
-    tile.dataset.index = i; // Position speichern
-    tile.onclick = () => cycleTileAndNeighbors(i);
+    tile.onclick = () => cycleColor(tile);
 
     tiles.push(tile);
     grid.appendChild(tile);
@@ -136,37 +136,15 @@ function createGrid() {
 }
 
 function cycleColor(tile) {
+  if (solved) return;
+
   let index = Number(tile.dataset.color);
   index = (index + 1) % colors.length;
   tile.dataset.color = index;
   tile.style.backgroundColor = colors[index];
-}
-
-// 🔄 Klick auf Tile + Nachbarn
-function cycleTileAndNeighbors(index) {
-  if (solved) return;
-
-  const neighbors = getNeighbors(index);
-  neighbors.push(index); // auch das eigene Feld
-
-  neighbors.forEach(i => cycleColor(tiles[i]));
 
   checkWin();
-  checkAllSame();
-}
-
-// 📌 Nachbar-Indizes berechnen
-function getNeighbors(index) {
-  const neighbors = [];
-  const row = Math.floor(index / 3);
-  const col = index % 3;
-
-  if (row > 0) neighbors.push(index - 3); // oben
-  if (row < 2) neighbors.push(index + 3); // unten
-  if (col > 0) neighbors.push(index - 1); // links
-  if (col < 2) neighbors.push(index + 1); // rechts
-
-  return neighbors;
+  checkSecret(); // 🔑 Prüfen, ob alle gelb
 }
 
 /* 🧠 WIN CHECK */
@@ -186,20 +164,17 @@ function checkWin() {
   }
 }
 
-/* ⚠️ Alle gleiche Farbe außer Goal */
-function checkAllSame() {
-  if (solved) return;
-
-  const firstColor = colors[Number(tiles[0].dataset.color)];
-  const allSame = tiles.every(
-    t => colors[Number(t.dataset.color)] === firstColor
+/* ⚠️ Secret Check: alle Gelb */
+function checkSecret() {
+  const allSecret = tiles.every(
+    t => colors[Number(t.dataset.color)] === SECRET_COLOR
   );
 
-  if (allSame && firstColor !== GOAL_COLOR) {
+  if (allSecret) {
     setTimeout(() => {
-      alert("⚠️ Alle Felder gleich!\nStarte neu...");
+      alert("🤫 Geheim entdeckt! Starte neu...");
       startGame();
-    }, 150);
+    }, 200);
   }
 }
 
