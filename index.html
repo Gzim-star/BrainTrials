@@ -101,8 +101,7 @@ const colors = [
 ];
 
 const GOAL_COLOR = "#ba68c8";
-const SECRET_COLOR = "#fff176"; // Gelb als Geheimnis
-const TOTAL_TIME = 60; 
+const TOTAL_TIME = 60;
 
 let tiles = [];
 let timeLeft = TOTAL_TIME;
@@ -128,7 +127,7 @@ function createGrid() {
     tile.dataset.color = startIndex;
     tile.style.backgroundColor = colors[startIndex];
 
-    tile.onclick = () => cycleColor(tile);
+    tile.onclick = () => cycleColor(tile); // 🔑 Nur dieses Feld ändern
 
     tiles.push(tile);
     grid.appendChild(tile);
@@ -138,13 +137,14 @@ function createGrid() {
 function cycleColor(tile) {
   if (solved) return;
 
+  // 🔹 Nur das angeklickte Feld ändern
   let index = Number(tile.dataset.color);
   index = (index + 1) % colors.length;
   tile.dataset.color = index;
   tile.style.backgroundColor = colors[index];
 
   checkWin();
-  checkSecret(); // 🔑 Prüfen, ob alle gelb
+  // Optional: checkSecret(); // Falls du Gelb-Geheimnis haben willst
 }
 
 /* 🧠 WIN CHECK */
@@ -160,20 +160,6 @@ function checkWin() {
     clearInterval(timerInterval);
     setTimeout(() => {
       alert("🎉 Herzlichen Glückwunsch!\nDu bist ein Denker 🧠");
-    }, 200);
-  }
-}
-
-/* ⚠️ Secret Check: alle Gelb */
-function checkSecret() {
-  const allSecret = tiles.every(
-    t => colors[Number(t.dataset.color)] === SECRET_COLOR
-  );
-
-  if (allSecret) {
-    setTimeout(() => {
-      alert("🤫 Geheim entdeckt! Starte neu...");
-      startGame();
     }, 200);
   }
 }
