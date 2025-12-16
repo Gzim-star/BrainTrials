@@ -68,6 +68,16 @@ h1 {
   filter: brightness(1.15);
 }
 
+.blink {
+  animation: blink 0.2s;
+}
+
+@keyframes blink {
+  0% { filter: brightness(2); }
+  50% { filter: brightness(0.5); }
+  100% { filter: brightness(1); }
+}
+
 @media (max-width: 600px) {
   #grid {
     grid-template-columns: repeat(3, 90px);
@@ -96,7 +106,7 @@ const colors = [
   "#e57373", // red
   "#64b5f6", // blue
   "#81c784", // green
-  "#fff176", // yellow (Geheimnis)
+  "#fff176", // yellow
   "#ba68c8"  // 💜 purple (goal)
 ];
 
@@ -107,7 +117,7 @@ let tiles = [];
 let timeLeft = TOTAL_TIME;
 let timerInterval;
 let solved = false;
-let lastUniformColor = null; // 🔑 Merkt die letzte Farbe, die alle Felder hatten
+let lastUniformColor = null; // Letzte Farbe, die alle Felder hatten
 
 function startGame() {
   lastUniformColor = null; // Reset
@@ -148,7 +158,6 @@ function cycleColor(tile) {
   checkUniformColor();
 }
 
-/* 🧠 WIN CHECK */
 function checkWin() {
   if (solved) return;
 
@@ -165,7 +174,6 @@ function checkWin() {
   }
 }
 
-/* ⚠️ Prüfen, ob alle Felder gleiche Farbe haben */
 function checkUniformColor() {
   const firstColor = colors[Number(tiles[0].dataset.color)];
   const allSame = tiles.every(
@@ -174,19 +182,19 @@ function checkUniformColor() {
 
   if (allSame) {
     if (lastUniformColor && firstColor !== lastUniformColor) {
-      // Spieler versucht, andere Farbe auf alle Felder zu machen → kleiner Refresh
+      // Spieler versucht andere Farbe → kleiner blink+refresh
+      tiles.forEach(tile => tile.classList.add("blink"));
       setTimeout(() => {
-        alert("🔄 Versuch erkannt! Kleiner Refresh...");
+        tiles.forEach(tile => tile.classList.remove("blink"));
         startGame();
       }, 200);
     } else {
-      // erste Uniform-Farbe wird gespeichert
+      // erste Uniform-Farbe merken
       lastUniformColor = firstColor;
     }
   }
 }
 
-/* ⏳ TIMER */
 function startTimer() {
   clearInterval(timerInterval);
   timeLeft = TOTAL_TIME;
@@ -213,7 +221,6 @@ function updateTimerUI() {
   else timerDiv.classList.add("timer-red");
 }
 
-/* 🔄 RESET */
 function resetGame() {
   alert("⏱ Time over!\nTry again.");
   startGame();
