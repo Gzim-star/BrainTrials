@@ -48,7 +48,7 @@ button:hover { background: #4caf50; }
 </head>
 <body>
 <div id="gameContainer">
-  <h1>🧠 BrainTrials</h1>
+  <h1>🧠</h1>
   <button onclick="startWordChain()">START</button>
 </div>
 <script>
@@ -70,7 +70,7 @@ function startWordChain(){
   const container=document.getElementById('gameContainer');
   container.innerHTML=`
     <h1></h1>
-    <div id="wordDisplay">Start word: Apple</div>
+    <div id="wordDisplay">Apple</div>
     <div id="inputContainer">
       <input type="text" id="playerWord" placeholder="Type your word here" autocomplete="off" autocapitalize="none">
       <button onclick="playWord()">OK</button>
@@ -181,7 +181,7 @@ function startChromaticTrial(){
   stage='chromatic';
   const container=document.getElementById('gameContainer');
   container.innerHTML=`
-    <h1>🌈 Chromatic Trial</h1>
+    <h1></h1>
     <div id="grid"></div>
     <div id="timer">⏳ Time left: 60</div>
   `;
@@ -229,7 +229,7 @@ function checkWin(){
   if(allGoal && !solved){
     solved = true;
     clearInterval(chromaticTimerInterval);
-    alert("🎉 Herzlichen Glückwunsch!\nDu hast die Geheimfarbe gefunden!");
+    alert("🎉");
     setTimeout(restartGame, 500);
   }
 }
@@ -277,7 +277,7 @@ function restartGame(){
 
   const container = document.getElementById('gameContainer');
   container.innerHTML = `
-    <h1>🧠 BrainTrials</h1>
+    <h1>🧠</h1>
     <button onclick="startWordChain()">START</button>
   `;
 
