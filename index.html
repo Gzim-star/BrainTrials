@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>🧠 BrainTrials + Chromatic Trial</title>
+<title>🧠</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
@@ -78,7 +78,7 @@ function startWordChain(){
     <div id="message"></div>
   `;
   currentWord='Apple'; usedWords=[currentWord];
-  wordList=["Apple","Samsung","Elephant","Tiger","Rabbit","Tree","Eagle","Egg","Giraffe","Fish","Horse","Orange","Grapes","Snake","Emu","Umbrella","Lion","Nut","Tapir","Rat","Tomato","Owl","Lemon","Night","Hat","Turtle","Eel","Lamb","Bread","Dog","Goat","Ant","Seal","Lily","Yak","Kangaroo"];
+  wordList=["Apple","Samsung","Elephant","Tiger","Rabbit","Tree","Eagle","Egg","Giraffe","Fish","Horse","Orange","Grapes","Snake","Emu","Umbrella","Lion","Tapir","Rat","Tomato","Owl","Lemon","Night","Hat","Turtle","Eel","Lamb","Bread","Dog","Goat","Ant","Seal","Lily","Yak","Kangaroo"];
 }
 
 function playWord(){
@@ -93,7 +93,7 @@ function playWord(){
   if(word.toLowerCase()===reversed){message.textContent="❌ Reversed!";return;}
   if(usedWords.map(w=>w.toLowerCase()).includes(word.toLowerCase())){message.textContent="❌ Already used!";return;}
   usedWords.push(word); currentWord=word;
-  document.getElementById('wordDisplay').textContent=`Your word: ${currentWord}`;
+  document.getElementById('wordDisplay').textContent=``;
   input.value=''; message.textContent='';
   setTimeout(aiTurn,500);
 }
@@ -175,7 +175,7 @@ function checkMathAnswer(){const input=document.getElementById('answer'); if(inp
 // ==========================
 // CHROMATIC TRIAL
 // ==========================
-const colorsCT=["#e57373","#64b5f6","#81c784","#fff176","#ba68c8"];
+const colorsCT=["#e57373","#64b5f6","#81c784","#f44336","#fff176","#ba68c8"];
 const CHROMATIC_GOAL="#ba68c8"; 
 let tilesCT=[], chromaticTime=60, chromaticTimerInterval, uniformTimeout=null, solved=false;
 
@@ -279,7 +279,7 @@ function restartGame(){
 
   const container = document.getElementById('gameContainer');
   container.innerHTML = `
-    <h1>🧠 BrainTrials</h1>
+    <h1>🧠</h1>
     <button onclick="startWordChain()">START</button>
   `;
 
