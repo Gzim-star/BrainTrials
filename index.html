@@ -53,7 +53,38 @@ button:hover { background: #4caf50; }
   <h1>🧠</h1>
   <button onclick="startWordChain()">START</button>
 </div>
-<script>
+  <!-- Tip Button -->
+<button id="tipButton">❓</button>
+
+<!-- Modal für die Tipps -->
+<div id="tipModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <p></p>
+  </div>
+</div>
+  <script>
+    // ========================== TIP BUTTON LOGIC ==========================
+const tipButton = document.getElementById('tipButton');
+const tipModal = document.getElementById('tipModal');
+const closeBtn = document.querySelector('.close');
+
+tipButton.onclick = () => {
+  let tipText = '';
+  if(stage === 'word') tipText = 'Hier ist ein Tipp für das Word Chain Spiel.';
+  else if(stage === 'tic') tipText = 'Hier ist ein Tipp für Tic-Tac-Toe.';
+  else if(stage === 'math') tipText = 'Hier ist ein Tipp für die Math Challenge.';
+  else if(stage === 'chromatic') tipText = 'Hier ist ein Tipp für den Chromatic Trial.';
+  tipModal.querySelector('p').innerHTML = tipText;
+  tipModal.style.display = 'block';
+};
+
+closeBtn.onclick = () => tipModal.style.display = 'none';
+
+window.onclick = (e) => { 
+  if(e.target === tipModal) tipModal.style.display = 'none';
+};
+  
 // ========================== VARIABLES ==========================
 let stage='start', wordScore=0, ticScore={player:0,ai:0,draw:0};
 let currentWord='', usedWords=[], wordList=[];
