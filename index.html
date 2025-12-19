@@ -112,14 +112,50 @@ const tipModal = document.getElementById('tipModal');
 const closeBtn = document.querySelector('.close');
 
 tipButton.onclick = () => {
-  let tipText = '🧠 BrainTrials – Are you ready?
-You are entering the arena of challenges! Four tricky games await you: Word Chain, Tic-Tac-Toe, Math Challenge, and Chromatic Trial.
-Each level tests your logic, speed, and observation skills. Only those who think cleverly, react quickly, and recognize patterns can reach the end.
-💡 Tip: Sometimes strategy counts more than speed.';
-  if(stage === 'word') tipText = 'Hier ist ein Tipp für das Word Chain Spiel.';
-  else if(stage === 'tic') tipText = 'Hier ist ein Tipp für Tic-Tac-Toe.';
-  else if(stage === 'math') tipText = 'Hier ist ein Tipp für die Math Challenge.';
-  else if(stage === 'chromatic') tipText = 'Hier ist ein Tipp für den Chromatic Trial.';
+  let tipText = '';
+  if(stage === 'start') tipText = `
+    <p>🧠 BrainTrials – Are you ready?</p>
+    <p>You are entering the arena of challenges! Four tricky games await you: Word Chain, Tic-Tac-Toe, Math Challenge, and Chromatic Trial.</p>
+    <p>Each level tests your logic, speed, and observation skills. Only those who think cleverly, react quickly, and recognize patterns can reach the end.</p>
+    <p>💡 Tip: Sometimes strategy counts more than speed.</p>
+  `;
+
+  else if(stage === 'word') tipText = `
+    <p>Word Chain Tips:</p>
+    <ul>
+      <li>Think of the last letter of the previous word.</li>
+      <li>No repetitions allowed!</li>
+      <li>Longer words are smarter.</li>
+    </ul>
+  `;
+
+  else if(stage === 'tic') tipText = `
+    <p>Tic-Tac-Toe Tips:</p>
+    <ul>
+      <li>Get three in a row to win.</li>
+      <li>Block your opponent.</li>
+      <li>The center is powerful.</li>
+      <li>It's simple!</li>
+    </ul>
+  `;
+
+  else if(stage === 'math') tipText = `
+    <p>Math Challenge Tips:</p>
+    <ul>
+      <li>Follow order of operations (PEMDAS).</li>
+      <li>Solve quickly, time is running!</li>
+      <li>Correct answers let you advance, wrong answers send you back.</li>
+    </ul>
+  `;
+
+  else if(stage === 'chromatic') tipText = `
+    <p>Chromatic Trial Tips:</p>
+    <ul>
+      <li>Make all tiles the same color.</li>
+      <li>Focus on one color.</li>
+      <li>Act fast, or the grid will reset.</li>
+    </ul>
+  `;
   tipModal.querySelector('p').innerHTML = tipText;
   tipModal.style.display = 'block';
 };
