@@ -180,14 +180,27 @@ function startWordChain(){
   stage='word';
   const container=document.getElementById('gameContainer');
   container.innerHTML=`
-    <h1></h1>
-    <div id="wordDisplay">Apple</div>
-    <div id="inputContainer">
-      <input type="text" id="playerWord" placeholder="Type your word here" autocomplete="off" autocapitalize="none">
-      <button onclick="playWord()">OK</button>
-    </div>
-    <div id="message"></div>
-  `;
+      <h1></h1>
+  <div id="wordDisplay">Apple</div>
+
+  <div id="inputContainer">
+    <input type="text" id="playerWord" placeholder="Type your word here" autocomplete="off" autocapitalize="none">
+    <button onclick="playWord()">OK</button>
+  </div>
+
+  <div id="message"></div>
+
+  <!-- 🧠 Brain Hint -->
+  <div id="wordHint" style="
+    margin-top:15px;
+    font-family:'Press Start 2P', cursive;
+    font-size:0.7em;
+    color:#ffc107;
+    min-height:18px;
+    opacity:0;
+    transition: opacity 0.5s;
+  "></div>
+`;
   currentWord='Apple'; usedWords=[currentWord];
   wordList=["Algorithm","Entropy","Hypothesis","Paradox","Labyrinth",
   "Quantum","Syntax","Recursion","Neural","Topology",
@@ -201,7 +214,7 @@ function playWord(){
   const message=document.getElementById('message');
   if(!word) return;
   // Mindestlänge
-if(word.length < 6){
+if(word.length < 3){
   message.textContent = "❌ Wrong";
   return;
 }
@@ -229,8 +242,11 @@ function aiTurn(){
   const lastChar = currentWord.slice(-1).toLowerCase();
   let possible = wordList.filter(
     w => w[0].toLowerCase() === lastChar && !usedWords.includes(w)
-  );
-
+  );// Wenn keine passenden Wörter → Brain Hint
+if(possible.length === 0){
+  setTimeout(showWordChainHint, 5000);
+  return;
+}
   if(possible.length === 0){
     const remaining = wordList.filter(w => !usedWords.includes(w));
     if(remaining.length > 0){
@@ -269,7 +285,16 @@ function aiTurn(){
   }
 }
 
+function showWordChainHint() {
+  const hint = document.getElementById('wordHint');
+  if (!hint) return; // Falls das Element noch nicht geladen ist
+  hint.textContent = "Only the right words will take you further";
+  hint.style.opacity = "1";
 
+  setTimeout(() => {
+    hint.style.opacity = "0";
+  }, 3000);
+}
 // ========================== TIC TAC TOE ==========================
 function startTicTacToe(){
   stage='tic';
@@ -363,7 +388,22 @@ function startChromaticTrial(){
   <h1></h1>
 
     <div id="grid"></div>
-
+<div id="chromaticWinText" style="
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1em;
+  color: #ffffff;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 1s;
+  pointer-events: none;
+">
+  Correct<br>
+  
+</div>
     <div id="chromaticText" style="
       margin-top:15px;
       font-family:'Press Start 2P', cursive;
@@ -420,15 +460,17 @@ function cycleColor(tile){
 
 // Prüfen, ob alle Felder die Ziel-Farbe haben
 function checkWin(){
-  const allGoal = tilesCT.every(t => colorsCT[Number(t.dataset.color)] === CHROMATIC_GOAL);
+  const allGoal = tilesCT.every(
+    t => colorsCT[Number(t.dataset.color)] === CHROMATIC_GOAL
+  );
+
   if(allGoal && !solved){
     solved = true;
     clearInterval(chromaticTimerInterval);
-    alert("🫵");
-    setTimeout(restartGame, 500);
+    clearTimeout(uniformTimeout);
+    showChromaticWin();
   }
 }
-
 // Prüfen, ob alle Felder die gleiche Farbe haben (nicht unbedingt Ziel-Farbe)
 function checkUniformReset(){
   const firstColor = colorsCT[Number(tilesCT[0].dataset.color)];
@@ -476,7 +518,7 @@ function showChromaticMessage(){
   var text = document.getElementById('chromaticText');
   if(!text) return;
 
-  text.textContent = "Hello 👀 have you found the color?";
+  text.textContent = "Have you found the color?";
   text.style.opacity = "1";
 
   setTimeout(function(){
@@ -504,6 +546,16 @@ function showChromaticMessage(){
   gameOver = false;
   correctAnswer = 0;
   correctMathCount = 0;
+}
+function showChromaticWin(){
+  const text = document.getElementById('chromaticWinText');
+  if(!text) return;
+
+  text.style.opacity = "1";
+
+  setTimeout(() => {
+    restartGame();
+  }, 5000); // ⏱ nach 5 Sekunden zurück zum Start
 }
 
 </script>
