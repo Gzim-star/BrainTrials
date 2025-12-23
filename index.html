@@ -124,7 +124,7 @@ tipButton.onclick = () => {
       <p>Word Chain Tips:</p>
     <ul>
       <li>Think of the last letter of...</li>
-      <li>Find the tipp.</li>
+      <li>Find the Answer.</li>
       <li>Longer or smarter❗️</li>
     </ul>
   `;
@@ -198,7 +198,7 @@ function startWordChain(){
     color:#ffc107;
     min-height:18px;
     opacity:0;
-    transition: opacity 0.3s;
+    transition: opacity 0.5s;
   "></div>
 `;
   currentWord='Apple'; usedWords=[currentWord];
@@ -215,7 +215,7 @@ function playWord(){
   if(!word) return;
   // Mindestlänge
 if(word.length < 6){
-  message.textContent = "❌ Wrong";
+  message.textContent = "❌ Wrong!";
   return;
 }
 
@@ -223,7 +223,7 @@ if(word.length < 6){
   // Kein gleicher Endbuchstabe wie davor
 const lastTwo = currentWord.slice(-2).toLowerCase();
 if(word.slice(-1).toLowerCase() === lastTwo[0]){
-  message.textContent = "❌ Weak ending";
+  message.textContent = "❌ Weak ending!";
   return;
   
 }
@@ -278,7 +278,7 @@ if(possible.length === 0){
 
   wordScore++;
 
-  if(wordScore >= 3){
+  if(wordScore >= 6){
     const msg = document.getElementById('message');
     msg.textContent = '';
     setTimeout(startTicTacToe, 500);
