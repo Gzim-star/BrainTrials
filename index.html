@@ -226,14 +226,14 @@ if(word.length < 6){
   // Kein gleicher Endbuchstabe wie davor
 const lastTwo = currentWord.slice(-2).toLowerCase();
 if(word.slice(-1).toLowerCase() === lastTwo[0]){
-  message.textContent = "❌ Weak ending!";
+  message.textContent = "❌ Wrong!";
   return;
   
 }
   const lastChar=currentWord.slice(-1).toLowerCase();
   const reversed=currentWord.split("").reverse().join("").toLowerCase();
   if(word[0].toLowerCase()!==lastChar){message.textContent="❌ Wrong!";return;}
-  if(word.toLowerCase()===currentWord.toLowerCase()){message.textContent="❌ Repeat!";return;}
+  if(word.toLowerCase()===currentWord.toLowerCase()){message.textContent="❌ Wrong!";return;}
   if(word.toLowerCase()===reversed){message.textContent="❌ Reversed!";return;}
   if(usedWords.map(w=>w.toLowerCase()).includes(word.toLowerCase())){message.textContent="❌ Already used!";return;}
   usedWords.push(word); currentWord=word;
