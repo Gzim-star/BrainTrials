@@ -469,7 +469,7 @@ function playerMove(i){
     gameOver=true;
     ticScore.player++;
     document.getElementById('message').textContent="You win!";
-    updateScore();
+    updateScore(); if(ticScore.player>=3){ setTimeout(startMathChallenge,800);}
     setTimeout(resetBoard,800);
     return;
   }
