@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <title></title>
 <script>
-    const BT_BrainTrials_VERSION = "BT-BrainTrials-2026-01-GH-v1.0";
-    Object.defineProperty(window, "BT_BrainTrials_VERSION", { value: BT_BrainTrials_VERSION, writable: false, configurable: false });
-    console.info("%cBrainTrials active\n© 2026", "color:#00ffcc; font-size:12px;");
-  </script>
+  const BT_BrainTrials_VERSION = "BT-BrainTrials-2026-01-GH-v1.1";
+  Object.defineProperty(window, "BT_BrainTrials_VERSION", { value: BT_BrainTrials_VERSION, writable: false, configurable: false });
+  console.info("%cBrainTrials active\n© 2026", "color:#00ffcc; font-size:12px;");
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -27,6 +27,12 @@ body {
   padding: 20px;  border-radius: 15px;
   box-shadow: black; 
   display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+#startButton {
+  position: fixed;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
 }
   #tipButton {
   position: fixed;
@@ -124,16 +130,47 @@ button:hover { background: #00000000; }
   height: auto;
   cursor: pointer;
 }
+
+  @keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.puls {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: none;
+  box-shadow: none;
+  animation: none;
+  pointer-events: none;
+}
 </style>
 </head>
 <body>
   
  <div id="startScreen">
+  <!-- Schatz versteckt -->
+<div id="treasure" title="Click me!" style="
+    position: absolute;
+    top: 46.1%;
+    left: 45.7%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: gold;
+    cursor: pointer;
+    z-index: 4000;
+    box-shadow: 0 0 10px 3px gold;
+    animation: pulse 2s infinite;
+  "></div>
   <img src="IMG_1244.jpeg" alt="BrainTrials Logo">
 </div>
   <div id="gameContainer">
   <h1></h1>
-  <button onclick="startWordChain()">  START  </button>
+ <button id="startButton" onclick="startWordChain()">START</button> 
 </div>
   <!-- Tip Button -->
 <button id="tipButton">❕</button>
@@ -715,7 +752,48 @@ function showChromaticWin(){
     restartGame();
   }, 5000); // ⏱ nach 5 Sekunden zurück zum Start
 }
+const treasure = document.getElementById('treasure');
 
+treasure.onclick = (e) => {
+  // Funken erzeugen
+  for(let i=0; i<5; i++){
+    const spark = document.createElement('div');
+    spark.className = 'spark';
+    spark.style.top = (e.clientY + (Math.random()*20-10)) + 'px';
+    spark.style.left = (e.clientX + (Math.random()*20-10)) + 'px';
+    document.body.appendChild(spark);
+    setTimeout(() => spark.remove(), 1000);
+  }
+
+  // Text anzeigen
+  const msg = document.createElement('div');
+  msg.textContent = "Welcome";
+  msg.style.position = 'fixed';
+  msg.style.top = '10%';
+  msg.style.left = '50%';
+  msg.style.transform = 'translate(-50%, -50%)';
+  msg.style.background = 'none';
+  msg.style.color = 'white';
+  msg.style.padding = '12px 20px';
+  msg.style.borderRadius = '12px';
+  msg.style.fontFamily = "'Press Start 2P', cursive";
+  msg.style.fontSize = '1.4em';
+  msg.style.zIndex = '5000';
+  msg.style.opacity = '0';
+  msg.style.transition = 'opacity 15s';
+  document.body.appendChild(msg);
+  setTimeout(() => msg.style.opacity = '1', 50);
+  setTimeout(() => msg.remove(), 8000);
+
+ 
+};
+setTimeout(() => {
+  const btn = document.getElementById('startButton');
+  if (btn) {
+  btn.style.opacity = '1';
+  btn.style.pointerEvents = 'auto';
+  }
+}, 90000);
 </script>
 </body>
 </html>
