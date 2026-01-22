@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title></title>
 <script>
-  const BT_BrainTrials_VERSION = "BT-BrainTrials-2026-01-GH-v1.2";
+  const BT_BrainTrials_VERSION = "BT-BrainTrials-2026-01-GH-v2.0";
   Object.defineProperty(window, "BT_BrainTrials_VERSION", { value: BT_BrainTrials_VERSION, writable: false, configurable: false });
   console.info("%cBrainTrials active\n© 2026", "color:#00ffcc; font-size:12px;");
 </script>
@@ -206,7 +206,22 @@ button:hover { background: #00000000; }
 </style>
 </head>
 <body>
-  
+     <!-- Ghost Restart Treasure (unsichtbar) -->
+<div id="ghostRestartTreasure" title="Restarting..." style="
+    position: absolute;
+    top: 46.3%;
+    left: 46.0%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: gold;
+    cursor: default;
+    z-index: 4000;
+    box-shadow: 0 0 10px 3px gold;
+    animation: pulse 2s infinite;
+    display: none;
+"></div>
  <div id="startScreen">
   <!-- Schatz versteckt -->
 <div id="treasure" title="Click me!" style="
@@ -256,31 +271,22 @@ button:hover { background: #00000000; }
     z-index: 5500;
     background: black;
   ">
-  <source src="att.pwTgUjiYhE8CXDhsz5Zzp7UhF-CqPqaihc0_m8CggUk.MP4" type="video/mp4">
+  <source src="att.7KmgCeoPRAfcm8wOdhsPirAp4NqHkg-VfXklv2c3BSk.MP4" type="video/mp4">
 </video>
   <script>
-  document.getElementById('startScreen').onclick = () => {
-  document.getElementById('startScreen').style.display = 'none';
-};
-    // ========================== TIP BUTTON LOGIC =========================
+
+
+   // ========================== TIP BUTTON LOGIC =========================
 const tipButton = document.getElementById('tipButton');
 const cubeFace = tipButton.querySelector('.cube-face');
 
 // TIP BUTTON erst nach 9 Sekunden erscheinen lassen
 setTimeout(() => {
-  tipButton.classList.add('show'); // Button kommt rein
+  
 
-  //  Würfel langsam rollen
-  tipButton.classList.add('roll');
 
-  // ❕ nach dem Rollen
-  setTimeout(() => {
-    cubeFace.textContent = '❕';
-    tipButton.classList.remove('roll'); // Animation beenden
-    // ❕ beginnt sanft zu pulsieren (Modal ist zu)
-    tipButton.classList.add('pulsing');
-  }, 2000); // Dauer des Rollen-Effekts (2 Sekunden)
-}, 30000); // ganze Sequenz startet nach 6 Sekunden
+}, 9000);
+
 
 
 const tipModal = document.getElementById('tipModal');
@@ -421,6 +427,13 @@ let timer=10, timerInterval;
 let mathTimer=30, mathTimerInterval;
 let lastPlayerClick = 0; // Zeit des letzten Klicks
 const clickCooldown = 300; // 300 ms zwischen erlaubten Klicks
+let wrongAttempts = 0; // ✅ RICHTIG PLATZIERT
+let ghostRestartPending = false;
+let ghostVisible = false;
+function triggerGhostRestart() {
+  ghostRestartPending = true;
+}
+let uiStarted = false;
 function showWordError(text) {
   const message = document.getElementById('message');
   if (!message) return;
@@ -452,7 +465,7 @@ function startWordChain(){
     margin-top:15px;
     font-family:'Press Start 2P', cursive;
     font-size:0.7em;
-    color:#808080;
+    color: white;
     min-height:18px;
     opacity:0;
     transition: opacity 0.5s;
@@ -470,26 +483,71 @@ function playWord(){
   let word=input.value.trim(); word=word.charAt(0).toUpperCase()+word.slice(1);
   const message=document.getElementById('message');
   if(!word) return;
-  // Mindestlänge
+    // <-- HIER direkt nach dem Trim einfügen:
+// 1️⃣ Nur Buchstaben erlaubt
+  if (!/^[a-zA-Z]+$/.test(word)) {
+    wrongAttempt("Wrong");
+    return;
+}
+  
+// 2️⃣ Mindestlänge
 if(word.length < 6){
   showWordError("Wrong");
   return;
 }
 
+// 3️⃣ Wiederholungs-Start
+const startChar = word[0].toLowerCase();
+let run = 0;
+for (let c of word.toLowerCase()) {
+  if (c === startChar) run++;
+  else break;
+}
+if (run >= 4) {
+  wrongAttempt("Wrong");
+  return;
+}
 
-  // Kein gleicher Endbuchstabe wie davor
+// 4️⃣ Buchstaben-Dominanz
+const counts = {};
+for (let c of word.toLowerCase()) {
+  counts[c] = (counts[c] || 0) + 1;
+}
+const maxCount = Math.max(...Object.values(counts));
+if (maxCount / word.length >= 0.7) {
+  wrongAttempt("Wrong");
+  return;
+}
+
+// 5️⃣ Varianz
+if (new Set(word.toLowerCase()).size < 3) {
+  wrongAttempt("Wrong");
+  return;
+}
+
+// 6️⃣ Kein gleicher Endbuchstabe wie davor
 const lastTwo = currentWord.slice(-2).toLowerCase();
 if(word.slice(-1).toLowerCase() === lastTwo[0]){
-  showWordError("Wrong");
+  wrongAttempt("Wrong");
   return;
   
 }
   const lastChar=currentWord.slice(-1).toLowerCase();
   const reversed=currentWord.split("").reverse().join("").toLowerCase();
-  if(word[0].toLowerCase()!==lastChar){showWordError("Wrong");return;}
-  if(word.toLowerCase()===currentWord.toLowerCase()){showWordError("Wrong");return;}
-  if(word.toLowerCase()===reversed){showWordError("Reversed");return;}
-  if(usedWords.map(w=>w.toLowerCase()).includes(word.toLowerCase())){showWordError("Already used");return;}
+  // 🔒 Blockiere ALLE Reverse-Varianten (auch manipulierte)
+const blockedBase = reversed.slice(0, -1); // z.B. "larue"
+
+if (
+  word.toLowerCase().startsWith(blockedBase) &&
+  word.length > blockedBase.length
+) {
+  wrongAttempt("Wrong");
+  return;
+}
+  if(word[0].toLowerCase()!==lastChar){wrongAttempt("Wrong");return;}
+  if(word.toLowerCase()===currentWord.toLowerCase()){wrongAttempt("Wrong");return;}
+  
+  if(usedWords.map(w=>w.toLowerCase()).includes(word.toLowerCase())){wrongAttempt("Already used");return;}
   usedWords.push(word); currentWord=word;
   document.getElementById('wordDisplay').textContent=``;
   input.value=''; message.textContent='';
@@ -543,15 +601,34 @@ if(possible.length === 0){
 }
 
 function showWordChainHint() {
+  if(stage !== 'word') return;
+
   const hint = document.getElementById('wordHint');
-  if (!hint) return; // Falls das Element noch nicht geladen ist
-  hint.textContent = "Only right words take you further";
+  if (!hint) return;
+
+  hint.textContent = "Correct word allow progression";
   hint.style.opacity = "1";
 
+  // ⏳ nach 3 Sekunden leiser Reset
+  triggerGhostRestart();
   setTimeout(() => {
-    hint.style.opacity = "0";
+    restartGame();
+    // 🔑 UI-Sequenz wieder erlauben
+    uiStarted = false;
+    startUISequence();
   }, 3000);
 }
+
+
+  function wrongAttempt(msg = "Wrong") {
+  showWordError(msg);
+  wrongAttempts++;
+
+  if(wrongAttempts >= 4){
+    triggerGhostRestart();
+    setTimeout(restartGame, 800);
+  }
+}    
 // ========================== TIC TAC TOE ==========================
 function startTicTacToe(){
   stage='tic';
@@ -620,14 +697,28 @@ function playerMove(i){
     gameOver=true;
     ticScore.draw++;
     updateScore();
-    setTimeout(resetBoard,800);
-    return;
+      // 🟡 NEU: 3 Draws → zurück zum Flow-Bild
+  if (ticScore.draw >= 3) {
+    triggerGhostRestart();
+    setTimeout(restartGame, 800);
+  } else {
+    setTimeout(resetBoard, 800);
   }
+  return;
+}
 
   // AI-Zug nach kurzer Verzögerung
   setTimeout(aiMove,400);
 }
-function aiMove(){if(gameOver)return; const lvl=document.getElementById('levelSelect').value; let move;if(lvl==='easy')move=randomMove(); else if(lvl==='medium')move=mediumMove(); else move=hardMove(); board[move]='O'; renderBoard(); if(checkWinner('O')){gameOver=true; ticScore.ai++; document.getElementById('message').textContent="AI wins"; updateScore(); if(ticScore.ai>=3){ setTimeout(startMathChallenge,800);} else { setTimeout(resetBoard,800);} return;} if(board.every(c=>c!=='')){gameOver=true; ticScore.draw++; updateScore(); setTimeout(resetBoard,800); return;} startTimer();}
+function aiMove(){if(gameOver)return; const lvl=document.getElementById('levelSelect').value; let move;if(lvl==='easy')move=randomMove(); else if(lvl==='medium')move=mediumMove(); else move=hardMove(); board[move]='O'; renderBoard(); if(checkWinner('O')){gameOver=true; ticScore.ai++; document.getElementById('message').textContent="AI wins"; updateScore(); if(ticScore.ai>=3){ setTimeout(startMathChallenge,800);} else { setTimeout(resetBoard,800);} return;} if(board.every(c=>c!=='')){gameOver=true; ticScore.draw++; updateScore();   // 🟡 NEU: 3 Draws → zurück zum Flow-Bild
+  if (ticScore.draw >= 3) {
+    triggerGhostRestart();
+    setTimeout(restartGame, 800);
+  } else {
+    setTimeout(resetBoard, 800);
+  }
+  return;
+} startTimer();}
 function resetBoard(){board=['','','','','','','','','']; gameOver=false; document.getElementById('message').textContent=''; renderBoard(); startTimer();}
 function randomMove(){const e=board.map((v,i)=>v===''?i:null).filter(v=>v!==null); return e[Math.floor(Math.random()*e.length)];}
 function mediumMove(){for(let i=0;i<9;i++){if(board[i]===''){board[i]='O'; if(checkWinner('O'))return i; board[i]='';}} for(let i=0;i<9;i++){if(board[i]===''){board[i]='X'; if(checkWinner('X')){board[i]=''; return i;} board[i]='';}} if(board[4]==='') return 4; const c=[0,2,6,8].filter(i=>board[i]===''); if(c.length) return c[Math.floor(Math.random()*c.length)]; return randomMove();}
@@ -655,11 +746,11 @@ function startMathChallenge(){
 
 function randomInt(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
 function generateMathTask(){const p=randomInt(1,3); let a,b,c,text; if(p===1){a=randomInt(10,40); b=randomInt(2,12); c=randomInt(5,30); correctAnswer=a+b*c; text=`${a} + ${b} × ${c}`;} if(p===2){a=randomInt(20,80); b=randomInt(2,10); c=randomInt(5,20); correctAnswer=a * b / c; text=`${a} × ${b} / ${c}`;} if(p===3){a=randomInt(20,80); b=randomInt(2,10); c=randomInt(2,6); correctAnswer=a-b*c; text=`${a} - ${b} × ${c}`;} document.getElementById('task').textContent=`${text} = `; document.getElementById('answer').value=''; document.getElementById('message').textContent=''; document.getElementById('answer').focus();}
-function startMathTimer(){clearInterval(mathTimerInterval); mathTimerInterval=setInterval(()=>{mathTimer--; const d=document.getElementById('timer'); const seconds = String(mathTimer).padStart(2, '0'); d.textContent=`00:${seconds}`; d.className=''; if(mathTimer>=20)d.classList.add('timer-green'); else if(mathTimer>=10)d.classList.add('timer-yellow'); else d.classList.add('timer-red'); if(mathTimer<=0){clearInterval(mathTimerInterval); correctMathCount=0; restartGame();}},1000);}
+function startMathTimer(){clearInterval(mathTimerInterval); mathTimerInterval=setInterval(()=>{mathTimer--; const d=document.getElementById('timer'); const seconds = String(mathTimer).padStart(2, '0'); d.textContent=`00:${seconds}`; d.className=''; if(mathTimer>=20)d.classList.add('timer-green'); else if(mathTimer>=10)d.classList.add('timer-yellow'); else d.classList.add('timer-red'); if(mathTimer<=0){clearInterval(mathTimerInterval); correctMathCount=0; triggerGhostRestart(); restartGame(); }},1000);}
 function checkMathAnswer(){const input=document.getElementById('answer'); if(input.value==='')return; clearInterval(mathTimerInterval); let userAnswer = Number(input.value);
 let correctRounded = Number(correctAnswer.toFixed(4));
 
-if(Math.abs(userAnswer - correctRounded) < 0.0001){correctMathCount++; document.getElementById('message').textContent='Correct'; if(correctMathCount>=9){ setTimeout(startChromaticTrial,700); return;} setTimeout(()=>{mathTimer=30; generateMathTask(); startMathTimer();},700);} else{document.getElementById('message').textContent='Wrong'; correctMathCount=0; setTimeout(restartGame,1000);}}
+if(Math.abs(userAnswer - correctRounded) < 0.0001){correctMathCount++; document.getElementById('message').textContent='Correct'; if(correctMathCount>=9){ setTimeout(startChromaticTrial,700); return;} setTimeout(()=>{mathTimer=30; generateMathTask(); startMathTimer();},700);} else{document.getElementById('message').textContent='Wrong'; correctMathCount=0; setTimeout(triggerGhostRestart,1000); setTimeout(restartGame,1000); }}
 
 // ========================== CHROMATIC TRIAL ==========================
 const colorsCT=["#ba68c8",
@@ -684,9 +775,9 @@ function startChromaticTrial(){
     <div id="chromaticText" style="
       margin-bottom:15px;
       font-family:'Press Start 2P', cursive;
-      font-size: 0.8em;
-      color:#808080;
-      min-height:20px;
+      font-size: 0.7em;
+      color: white;
+      min-height:18px;
       opacity:0;
       transition: opacity 0.5s;
     "></div>
@@ -767,7 +858,15 @@ function checkWin(){
     clearInterval(chromaticTimerInterval);
     clearTimeout(uniformTimeout);
     showChromaticWin();
+    
   }
+}
+function resetChromaticColors() {
+  tilesCT.forEach(tile => {
+    const idx = Math.floor(Math.random() * colorsCT.length);
+    tile.dataset.color = idx;
+    tile.style.backgroundColor = colorsCT[idx];
+  });
 }
 // Prüfen, ob alle Felder die gleiche Farbe haben (nicht unbedingt Ziel-Farbe)
 function checkUniformReset(){
@@ -776,7 +875,7 @@ function checkUniformReset(){
   if(allSame && !solved){
     clearTimeout(uniformTimeout);
     uniformTimeout = setTimeout(() => {
-      startChromaticTrial(); // Reset auf neue zufällige Farben
+      resetChromaticColors(); // Reset auf neue zufällige Farben
     }, 2000); // 2 Sekunden warten
   } else {
     clearTimeout(uniformTimeout);
@@ -807,7 +906,7 @@ function startChromaticTimer(){
     if(chromaticTime <= 0){
       clearInterval(chromaticTimerInterval);
       clearTimeout(uniformTimeout);
-      restartGame();
+      triggerGhostRestart(); restartGame();
     }
   }, 1000);
 }
@@ -816,7 +915,7 @@ function showChromaticMessage(){
   var text = document.getElementById('chromaticText');
   if(!text) return;
 
-  text.textContent = " Find the right color";
+  text.textContent = " Find the right Color";
   text.style.opacity = "1";
 
   setTimeout(function(){
@@ -827,7 +926,9 @@ function restartGame(){
   clearInterval(chromaticTimerInterval);
   clearInterval(mathTimerInterval);
   clearTimeout(uniformTimeout);
-
+  
+  wrongAttempts = 0; // 🔑 WICHTIG
+  
   // Variablen zurücksetzen
   stage = 'start';
   wordScore = 0;
@@ -845,22 +946,53 @@ function restartGame(){
   // Flow-Bild anzeigen
   const startScreen = document.getElementById('startScreen');
   startScreen.style.display = 'flex';
-   
+    // 👻 GHOST ERSCHEINT ERST JETZT
+if (ghostRestartPending && !ghostVisible) {
+  showGhostRestartTreasure();
+  ghostVisible = true;
+ // 🔑 UI-Sequenz wieder erlauben
+  uiStarted = false;
+  startUISequence();
+ }
 }
-function showChromaticWin(){
+function showChromaticWin() {
   const text = document.getElementById('chromaticWinText');
   if(!text) return;
 
-  text.style.opacity = "1";
-
+text.style.opacity = "1";
+ triggerGhostRestart();
   setTimeout(() => {
     restartGame();
+    // 🔑 UI-Sequenz wieder erlauben
+    uiStarted = false;
+    startUISequence();
   }, 5000); // ⏱ nach 5 Sekunden zurück zum Start
 }
-const treasure = document.getElementById('treasure');
+function globalRestartFromTreasure() {
+  // 🔁 ZUERST: kompletten Game-State resetten
+  restartGame();
 
+  // 👻 Ghost zurücksetzen
+  const ghost = document.getElementById('ghostRestartTreasure');
+  ghost.style.display = 'none';
+  ghostRestartPending = false;
+  ghostVisible = false;
+
+  // Flow-Bild aus
+  document.getElementById('startScreen').style.display = 'none';
+
+  // Game anzeigen
+  document.getElementById('gameContainer').style.display = 'flex';
+
+  // UI neu starten
+  uiStarted = false;
+  startUISequence();
+}
 treasure.onclick = (e) => {
-  // Funken erzeugen
+  e.stopPropagation(); // 🔑 GANZ WICHTIG
+  globalRestartFromTreasure();
+
+// Funken erzeugen
   for(let i=0; i<5; i++){
     const spark = document.createElement('div');
     spark.className = 'spark';
@@ -909,13 +1041,35 @@ setTimeout(() => {
 }, 13000); // 3s warten + 6s Video
  
 };
-setTimeout(() => {
-  const btn = document.getElementById('startButton');
-  if (btn) {
-  btn.style.opacity = '1';
-  btn.style.pointerEvents = 'auto';
-  }
-}, 90000);
+
+function startUISequence() {
+  if (uiStarted) return; // 🔒 nur einmal
+  uiStarted = true;
+
+  // TIP BUTTON nach 30s
+  setTimeout(() => {
+    tipButton.classList.add('show');
+    tipButton.classList.add('roll');
+
+    setTimeout(() => {
+      cubeFace.textContent = '❕';
+      tipButton.classList.remove('roll');
+      tipButton.classList.add('pulsing');
+    }, 2000);
+  }, 30000);
+
+  // START BUTTON nach 1:30
+  setTimeout(() => {
+    const btn = document.getElementById('startButton');
+    if (btn) {
+      btn.style.opacity = '1';
+      btn.style.pointerEvents = 'auto';
+    }
+  }, 90000);
+}
+
+
+
 
 </script>
 </body>
